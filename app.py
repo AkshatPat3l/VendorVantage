@@ -6,11 +6,16 @@ app = Flask(__name__)
 
 @app.route('/')
 def dashboard():
-    # Fetch all 53+ products we just ingested
-    data = execute_query("SELECT * FROM products ORDER BY id DESC;")
+    # COALESCE ensures that if stock_level is NULL, it returns 0 instead
+    query = """
+        SELECT p.*, COALESCE(i.stock_level, 0) as stock_level 
+        FROM products p
+        LEFT JOIN inventory i ON p.id = i.product_id
+        ORDER BY p.price DESC;
+    """
+    data = execute_query(query)
     count = len(data) if data else 0
     return render_template('index.html', products=data, total=count)
-
 # Professional "Health" endpoint
 @app.route('/health')
 def health():

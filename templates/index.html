@@ -59,24 +59,36 @@
 
     <div class="table-container">
       {% if products %}
-      <table>
-        <thead>
-          <tr>
-            {% for key in products[0].keys() %}
-            <th>{{ key }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for product in products %}
-          <tr>
-            {% for key, value in product.items() %}
-            <td>{{ value }}</td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <table class="table table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ASIN</th>
+            <th>Product Title</th>
+            <th>Brand</th>
+            <th>Price</th>
+            <th>Stock Level</th>
+            <th>Rating</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in products %}
+        <tr>
+            <td><code>{{ p.id }}</code></td>
+            <td><strong>{{ p.title }}</strong></td>
+            <td>{{ p.brand }}</td>
+            <td class="text-success">${{ "%.2f"|format(p.price) }}</td>
+            <td>
+                {% if p.stock_level < 15 %}
+                    <span class="badge bg-danger">Low: {{ p.stock_level }}</span>
+                {% else %}
+                    <span class="badge bg-success">In Stock: {{ p.stock_level }}</span>
+                {% endif %}
+            </td>
+            <td>⭐ {{ p.rating }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
       {% else %}
       <div class="empty-state">No products found.</div>
       {% endif %}

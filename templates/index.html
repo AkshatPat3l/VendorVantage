@@ -55,6 +55,35 @@
   </head>
   <body>
     <h1>Vendor Vantage Dashboard</h1>
+    <div class="row mb-4">
+    <div class="col-md-12">
+        <form action="/search" method="POST" class="d-flex shadow-sm">
+            <input type="text" name="query" class="form-control form-control-lg" 
+                   placeholder="Search Amazon.ca to ingest new products (e.g., 'Coffee Makers')..." required>
+            <button type="submit" class="btn btn-primary btn-lg ms-2">Ingest Data</button>
+        </form>
+    </div>
+</div>
+    <div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white p-3">
+            <h5>Total Inventory Value</h5>
+            <h2>${{ "{:,.2f}".format(total_value) }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white p-3">
+            <h5>Low Stock Alerts</h5>
+            <h2>{{ low_stock }} SKUs</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark p-3">
+            <h5>Market Avg Rating</h5>
+            <h2>⭐ {{ avg_rating }}</h2>
+        </div>
+    </div>
+</div>
     <div class="stats">Total Products: {{ total }}</div>
 
     <div class="table-container">
@@ -93,5 +122,23 @@
       <div class="empty-state">No products found.</div>
       {% endif %}
     </div>
+
+    <canvas id="priceChart" width="400" height="100"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for p in products[:10] %}"{{ p.title[:20] }}...",{% endfor %}],
+            datasets: [{
+                label: 'Price ($)',
+                data: [{% for p in products[:10] %}{{ p.price }},{% endfor %}],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        }
+    });
+</script>
   </body>
 </html>

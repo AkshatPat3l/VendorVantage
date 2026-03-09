@@ -5,13 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def harvest_amazon():
+def harvest_amazon_by_term(term):
     api_key = os.getenv("RAINFOREST_API_KEY")
     params = {
         'api_key': api_key,
         'type': 'search',
         'amazon_domain': 'amazon.ca',
-        'search_term': 'smart home'
+        'search_term': term
     }
     
     print("Connecting to Rainforest API...")
@@ -51,9 +51,11 @@ def harvest_amazon():
         cur.close()
         conn.close()
         print(f"Success! {len(items)} products synced with History & Inventory.")
+        return len(items)
 
     except Exception as e:
         print(f"Sync Error: {e}")
+        return 0
 
 if __name__ == "__main__":
-    harvest_amazon()
+    harvest_amazon_by_term('smart home')

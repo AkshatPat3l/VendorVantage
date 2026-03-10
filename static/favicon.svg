@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="geometricPrecision">
+  <circle cx="16" cy="16" r="15" fill="#FFFFFF" />
+
+  <path d="M9 7L16 13V25L9 19V7Z" fill="#D34D02"/>
+  <path d="M23 7L16 13V25L23 19V7Z" fill="#F96302"/>
+
+  <path d="M9 7L16 13L23 7H9Z" fill="white" fill-opacity="0.3"/>
+  
+  <circle cx="16" cy="13" r="1.5" fill="white"/>
+</svg>

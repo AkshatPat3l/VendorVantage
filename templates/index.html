@@ -1,144 +1,297 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vendor Vantage Dashboard</title>
+    <title>HD Vendor Vantage | Pro Sync Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        background-color: #f9fafb;
-        color: #111827;
-      }
-      h1 {
-        color: #2563eb;
-      }
-      .stats {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 20px;
-      }
-      .table-container {
-        overflow-x: auto;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 800px;
-      }
-      th,
-      td {
-        padding: 12px 16px;
-        border-bottom: 1px solid #e5e7eb;
-        text-align: left;
-      }
-      th {
-        background: #f3f4f6;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.875rem;
-        color: #4b5563;
-      }
-      tr:hover {
-        background-color: #f9fafb;
-      }
-      .empty-state {
-        text-align: center;
-        padding: 40px;
-        color: #6b7280;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Vendor Vantage Dashboard</h1>
-    <div class="row mb-4">
-    <div class="col-md-12">
-        <form action="/search" method="POST" class="d-flex shadow-sm">
-            <input type="text" name="query" class="form-control form-control-lg" 
-                   placeholder="Search Amazon.ca to ingest new products (e.g., 'Coffee Makers')..." required>
-            <button type="submit" class="btn btn-primary btn-lg ms-2">Ingest Data</button>
-        </form>
-    </div>
-</div>
-    <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card bg-primary text-white p-3">
-            <h5>Total Inventory Value</h5>
-            <h2>${{ "{:,.2f}".format(total_value) }}</h2>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-danger text-white p-3">
-            <h5>Low Stock Alerts</h5>
-            <h2>{{ low_stock }} SKUs</h2>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-warning text-dark p-3">
-            <h5>Market Avg Rating</h5>
-            <h2>⭐ {{ avg_rating }}</h2>
-        </div>
-    </div>
-</div>
-    <div class="stats">Total Products: {{ total }}</div>
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Roboto+Condensed:wght@400;700&display=swap');
 
-    <div class="table-container">
-      {% if products %}
-      <table class="table table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>ASIN</th>
-            <th>Product Title</th>
-            <th>Brand</th>
-            <th>Price</th>
-            <th>Stock Level</th>
-            <th>Rating</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for p in products %}
-        <tr>
-            <td><code>{{ p.id }}</code></td>
-            <td><strong>{{ p.title }}</strong></td>
-            <td>{{ p.brand }}</td>
-            <td class="text-success">${{ "%.2f"|format(p.price) }}</td>
-            <td>
-                {% if p.stock_level < 15 %}
-                    <span class="badge bg-danger">Low: {{ p.stock_level }}</span>
-                {% else %}
-                    <span class="badge bg-success">In Stock: {{ p.stock_level }}</span>
-                {% endif %}
-            </td>
-            <td>⭐ {{ p.rating }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-      {% else %}
-      <div class="empty-state">No products found.</div>
-      {% endif %}
-    </div>
-
-    <canvas id="priceChart" width="400" height="100"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [{% for p in products[:10] %}"{{ p.title[:20] }}...",{% endfor %}],
-            datasets: [{
-                label: 'Price ($)',
-                data: [{% for p in products[:10] %}{{ p.price }},{% endfor %}],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
+        :root {
+            --hd-orange: #F96302;
+            --hd-black: #333333;
+            --hd-gray: #F2F2F2;
         }
-    });
-</script>
-  </body>
+
+        body { background-color: var(--hd-gray); padding: 20px; font-family: 'Roboto Condensed', sans-serif; }
+        
+        /* HEADER THEME */
+        .hd-header { background: var(--hd-black); color: white; padding: 15px 25px; border-radius: 8px; border-bottom: 5px solid var(--hd-orange); margin-bottom: 25px; }
+        .hd-logo-text { font-family: 'Archivo Black', sans-serif; text-transform: uppercase; letter-spacing: -1px; line-height: 1; }
+        .hd-orange-text { color: var(--hd-orange); }
+
+        /* KPI THEME */
+        .kpi-card { border: none; border-radius: 4px; border-top: 6px solid var(--hd-orange); background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .kpi-title { color: #666; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+        .kpi-value { font-family: 'Archivo Black', sans-serif; font-size: 2rem; color: var(--hd-black); }
+
+        /* TABLE SYSTEM */
+        .table-container { background: white; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow-x: auto; max-height: 700px; overflow-y: auto; }
+        .fixed-table { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; }
+        .fixed-table thead { position: sticky; top: 0; z-index: 10; }
+        .fixed-table thead th { background: var(--hd-black); color: white; border: none; text-transform: uppercase; font-size: 0.85rem; padding: 15px; }
+        .fixed-table td { padding: 12px 10px; border-bottom: 1px solid #ddd; vertical-align: middle; }
+
+        .col-ids { width: 140px; } .col-img { width: 85px; } .col-desc { width: auto; } .col-brand { width: 160px; } .col-price { width: 120px; } .col-rate { width: 100px; }
+
+        /* DATA COMPONENTS */
+        .sku-badge { font-size: 0.75rem; font-weight: bold; background: var(--hd-gray); border: 1px solid #ccc; color: var(--hd-black); border-radius: 2px; padding: 3px 8px; font-family: 'Courier New', monospace; }
+        .description-cell { font-weight: 700; font-size: 0.9rem; line-height: 1.2; color: #000; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
+        .brand-badge { font-weight: 700; text-transform: uppercase; font-size: 0.75rem; background: var(--hd-orange) !important; color: white !important; border: none; display: block; text-align: center; padding: 4px; }
+        .img-thumb { width: 60px; height: 60px; object-fit: contain; border: 1px solid #eee; background: #fff; padding: 2px; border-radius: 4px; }
+        
+        /* FILTERS */
+        .filter-card { background: var(--hd-black); color: white; border-radius: 8px; padding: 20px; }
+        .filter-card label { color: var(--hd-orange); font-weight: 700; margin-bottom: 5px; font-size: 0.75rem; text-transform: uppercase; }
+        .form-select, .form-control { border-radius: 0; border: 2px solid #ddd; font-weight: bold; }
+        
+        /* BUTTONS */
+        .btn-hd { background: var(--hd-orange); color: white; border: none; font-weight: 700; text-transform: uppercase; border-radius: 0; transition: 0.2s; }
+        .btn-hd:hover { background: #d45402; color: white; transform: translateY(-2px); }
+        .btn-reset { background: #666; color: white; border: none; font-weight: 700; text-transform: uppercase; border-radius: 0; }
+        
+        .chart-container { background: white; border-radius: 4px; padding: 20px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="hd-header d-flex justify-content-between align-items-center">
+            <div class="hd-logo-text fs-2">THE <span class="hd-orange-text">VENDOR VANTAGE</span></div>
+            <div class="fw-bold text-uppercase">Pro Sync Dashboard | <span class="hd-orange-text">Akshat Patel</span></div>
+        </div>
+
+        <div class="row mb-4 g-3">
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Visible Inventory Value</div><div class="kpi-value" id="kpiValue">$0.00</div></div></div>
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Visible SKU Count</div><div class="kpi-value" id="kpiTotal">0</div></div></div>
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Current Quality Score</div><div class="kpi-value hd-orange-text" id="kpiRate">⭐ 0.0</div></div></div>
+        </div>
+
+        <div class="chart-container mb-4">
+            <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem;">Filtered Brand Distribution</h6>
+            <div style="height: 180px;"><canvas id="brandChart"></canvas></div>
+        </div>
+
+        <div class="filter-card mb-4 shadow">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label>Smart Search</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="UPC / Title...">
+                </div>
+                <div class="col-md-2">
+                    <label>Manufacturer</label>
+                    <select id="brandFilter" class="form-select">
+                        <option value="all">All Brands</option>
+                        {% set ns_b = namespace(brands=[]) %}
+                        {% for p in products %}{% if p.brand not in ns_b.brands %}{% set _ = ns_b.brands.append(p.brand) %}{% endif %}{% endfor %}
+                        {% for b in ns_b.brands|sort %}<option value="{{ b }}">{{ b|upper }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Pro Rating</label>
+                    <select id="ratingFilter" class="form-select">
+                        <option value="0">All Ratings</option>
+                        <option value="4.5">Elite (4.5+)</option>
+                        <option value="4.0">High (4.0+)</option>
+                        <option value="3.5">Good (3.5+)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Manifest Export Format</label>
+                    <select id="exportFormat" class="form-select">
+                        <option value="pdf-visual">Visual PDF w/ Live Chart (.pdf)</option>
+                        <option value="pdf-data">Clean Data PDF Only (.pdf)</option>
+                        <option value="xlsx">Excel Spreadsheet (.xlsx)</option>
+                        <option value="png">HQ Dashboard Snapshot (.png)</option>
+                        <option value="csv">Standard Table (.csv)</option>
+                        <option value="json">Developer Stream (.json)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button onclick="handleMasterExport()" class="btn btn-hd w-100 py-2">Execute Filtered Export</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-hover align-middle fixed-table mb-0">
+                <thead>
+                    <tr>
+                        <th class="col-ids text-center">SKU / DNA</th>
+                        <th class="col-img text-center">Product</th>
+                        <th class="col-desc">Description</th>
+                        <th class="col-brand text-center">Brand</th>
+                        <th class="col-price text-center">Price</th>
+                        <th class="col-rate text-center">Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for p in products %}
+                        {% set brand = p.brand|upper %}
+                        {# Brand Shield Logic #}
+                        {% if 'DEERE' in p.title|upper or p.brand|upper == 'JOHN' %}{% set brand = 'JOHN DEERE' %}{% endif %}
+                        {% if 'SAMSUNG' in p.title|upper %}{% set brand = 'SAMSUNG' %}{% endif %}
+
+                        <tr class="product-row" data-brand="{{ brand }}" data-price="{{ p.price }}" data-rating="{{ p.rating }}">
+                            <td class="col-ids text-center"><span class="sku-badge search-upc">#{{ p.id }}</span></td>
+                            <td class="col-img text-center"><img src="{{ p.photo_url }}" class="img-thumb" onerror="this.src='https://via.placeholder.com/60?text=HD'"></td>
+                            <td class="col-desc"><div class="description-cell search-title" title="{{ p.title }}">{{ p.title|upper }}</div></td>
+                            <td class="col-brand text-center"><span class="badge brand-badge search-brand">{{ brand }}</span></td>
+                            <td class="col-price text-center fw-bold text-dark">${{ "%.2f"|format(p.price) }}</td>
+                            <td class="col-rate text-center fw-bold text-warning">⭐ {{ p.rating }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const rows = Array.from(document.getElementsByClassName('product-row'));
+        let brandChart;
+
+        function updateDashboard() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const bLimit = document.getElementById('brandFilter').value;
+            const minRate = parseFloat(document.getElementById('ratingFilter').value);
+            
+            let val = 0, count = 0, rateSum = 0;
+            const bCounts = {};
+
+            rows.forEach(row => {
+                const title = row.querySelector('.search-title').innerText.toLowerCase();
+                const brand = row.dataset.brand;
+                const rating = parseFloat(row.dataset.rating);
+                
+                // DYNAMIC FILTER LOGIC
+                const matches = title.includes(term) && 
+                                (bLimit === 'all' || brand === bLimit) && 
+                                (rating >= minRate);
+
+                row.style.display = matches ? "" : "none";
+                
+                if (matches) {
+                    val += (parseFloat(row.dataset.price) * 10);
+                    count++;
+                    rateSum += rating;
+                    bCounts[brand] = (bCounts[brand] || 0) + 1;
+                }
+            });
+
+            document.getElementById('kpiValue').innerText = `$${val.toLocaleString()}`;
+            document.getElementById('kpiTotal').innerText = count;
+            document.getElementById('kpiRate').innerText = `⭐ ${(count > 0 ? (rateSum / count).toFixed(1) : "0.0")}`;
+            updateChart(bCounts);
+        }
+
+        function updateChart(counts) {
+            const labels = Object.keys(counts).sort((a,b) => counts[b]-counts[a]).slice(0, 10);
+            const data = labels.map(l => counts[l]);
+            if (brandChart) {
+                brandChart.data.labels = labels;
+                brandChart.data.datasets[0].data = data;
+                brandChart.update();
+            } else {
+                const ctx = document.getElementById('brandChart').getContext('2d');
+                brandChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'SKU Distribution', data, backgroundColor: '#F96302' }] },
+                    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                });
+            }
+        }
+
+        async function handleMasterExport() {
+            const format = document.getElementById('exportFormat').value;
+            
+            // CRITICAL FIX: Only grab rows currently visible to the user
+            const visibleRows = rows.filter(r => r.style.display !== 'none');
+            
+            const data = visibleRows.map(r => ({
+                SKU: r.querySelector('.search-upc').innerText.replace('#', ''),
+                Title: r.querySelector('.search-title').innerText,
+                Brand: r.dataset.brand,
+                Price: `$${parseFloat(r.dataset.price).toFixed(2)}`,
+                Rating: r.dataset.rating
+            }));
+
+            if (data.length === 0) return alert("Zero products matching your current filters. Export canceled.");
+
+            if (format.startsWith('pdf')) {
+                const doc = new jsPDF();
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(249, 99, 2); // HD Orange
+                doc.setFontSize(18);
+                doc.text("THE VENDOR VANTAGE | PRO MANIFEST", 14, 20);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text(`Pro Account: Akshat Patel | Date: ${new Date().toLocaleDateString()}`, 14, 28);
+                doc.text(`Visible Inventory Value: ${document.getElementById('kpiValue').innerText} | Count: ${data.length}`, 14, 33);
+
+                let startY = 40;
+                if (format === 'pdf-visual') {
+                    const chartCanvas = document.getElementById('brandChart');
+                    const chartImg = chartCanvas.toDataURL("image/png", 1.0);
+                    doc.addImage(chartImg, 'PNG', 14, 40, 180, 50);
+                    startY = 100;
+                }
+
+                doc.autoTable({
+                    startY: startY,
+                    head: [['SKU', 'Product Description', 'Brand', 'Price', 'Rating']],
+                    body: data.map(d => [d.SKU, d.Title, d.Brand, d.Price, d.Rating]),
+                    headStyles: { fillColor: [51, 51, 51], textColor: [255, 255, 255] },
+                    alternateRowStyles: { fillColor: [242, 242, 242] },
+                    styles: { fontSize: 8 }
+                });
+                doc.save(`HD_Pro_Filtered_${format}.pdf`);
+            } 
+            else if (format === 'xlsx') {
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Filtered_Inventory");
+                XLSX.writeFile(wb, "HD_Pro_Filtered_Inventory.xlsx");
+            }
+            else if (format === 'png') {
+                const filters = document.querySelector('.filter-card');
+                filters.style.visibility = 'hidden';
+                const canvas = await html2canvas(document.body, { scale: 2 });
+                const link = document.createElement('a');
+                link.download = 'HD_Dashboard_Snapshot.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                filters.style.visibility = 'visible';
+            }
+            else if (format === 'csv') {
+                const csv = "SKU,Title,Brand,Price,Rating\n" + data.map(d => `"${d.SKU}","${d.Title.replace(/"/g, '""')}","${d.Brand}",${d.Price},${d.Rating}`).join("\n");
+                downloadFile(csv, 'HD_Filtered_Export.csv', 'text/csv');
+            }
+            else {
+                downloadFile(JSON.stringify(data, null, 2), 'HD_Filtered_Export.json', 'application/json');
+            }
+        }
+
+        function downloadFile(content, name, type) {
+            const blob = new Blob([content], { type });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        }
+
+        ['searchInput', 'brandFilter', 'ratingFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateDashboard);
+        });
+
+        updateDashboard();
+    </script>
+</body>
 </html>

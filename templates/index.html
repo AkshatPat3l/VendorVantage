@@ -34,7 +34,7 @@
         .kpi-value { font-family: 'Archivo Black', sans-serif; font-size: 2rem; color: var(--hd-black); }
 
         /* TABLE SYSTEM */
-        .table-container { background: white; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow-x: auto; max-height: 700px; overflow-y: auto; }
+        .table-container { background: white; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow-x: auto; max-height: 600px; overflow-y: auto; }
         .fixed-table { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; }
         .fixed-table thead { position: sticky; top: 0; z-index: 10; }
         .fixed-table thead th { background: var(--hd-black); color: white; border: none; text-transform: uppercase; font-size: 0.85rem; padding: 15px; }
@@ -48,16 +48,12 @@
         .brand-badge { font-weight: 700; text-transform: uppercase; font-size: 0.75rem; background: var(--hd-orange) !important; color: white !important; border: none; display: block; text-align: center; padding: 4px; }
         .img-thumb { width: 60px; height: 60px; object-fit: contain; border: 1px solid #eee; background: #fff; padding: 2px; border-radius: 4px; }
         
-        /* FILTERS */
         .filter-card { background: var(--hd-black); color: white; border-radius: 8px; padding: 20px; }
         .filter-card label { color: var(--hd-orange); font-weight: 700; margin-bottom: 5px; font-size: 0.75rem; text-transform: uppercase; }
         .form-select, .form-control { border-radius: 0; border: 2px solid #ddd; font-weight: bold; }
         
-        /* BUTTONS */
         .btn-hd { background: var(--hd-orange); color: white; border: none; font-weight: 700; text-transform: uppercase; border-radius: 0; transition: 0.2s; }
         .btn-hd:hover { background: #d45402; color: white; transform: translateY(-2px); }
-        .btn-reset { background: #666; color: white; border: none; font-weight: 700; text-transform: uppercase; border-radius: 0; }
-        
         .chart-container { background: white; border-radius: 4px; padding: 20px; border: 1px solid #ddd; }
     </style>
 </head>
@@ -66,57 +62,55 @@
     <div class="container-fluid">
         <div class="hd-header d-flex justify-content-between align-items-center">
             <div class="hd-logo-text fs-2">THE <span class="hd-orange-text">VENDOR VANTAGE</span></div>
-            <div class="fw-bold text-uppercase">Pro Sync Dashboard | <span class="hd-orange-text">Akshat Patel</span></div>
+            <div class="fw-bold">PRO ANALYTICS | <span class="hd-orange-text">AKSHAT PATEL</span></div>
         </div>
 
         <div class="row mb-4 g-3">
-            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Visible Inventory Value</div><div class="kpi-value" id="kpiValue">$0.00</div></div></div>
-            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Visible SKU Count</div><div class="kpi-value" id="kpiTotal">0</div></div></div>
-            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Current Quality Score</div><div class="kpi-value hd-orange-text" id="kpiRate">⭐ 0.0</div></div></div>
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Factored Inventory Value</div><div class="kpi-value" id="kpiValue">$0.00</div></div></div>
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Normalized SKU Count</div><div class="kpi-value" id="kpiTotal">0</div></div></div>
+            <div class="col-md-4"><div class="card kpi-card p-3"><div class="kpi-title">Relational Quality Score</div><div class="kpi-value hd-orange-text" id="kpiRate">⭐ 0.0</div></div></div>
         </div>
 
         <div class="chart-container mb-4">
-            <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem;">Filtered Brand Distribution</h6>
+            <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem;">Brand Share (Fact Table Distribution)</h6>
             <div style="height: 180px;"><canvas id="brandChart"></canvas></div>
         </div>
 
         <div class="filter-card mb-4 shadow">
             <div class="row g-2 align-items-end">
                 <div class="col-md-2">
-                    <label>Smart Search</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="UPC / Title...">
+                    <label>Deep Search</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="SKU or Title...">
                 </div>
                 <div class="col-md-2">
-                    <label>Manufacturer</label>
+                    <label>Brand Dim</label>
                     <select id="brandFilter" class="form-select">
                         <option value="all">All Brands</option>
-                        {% set ns_b = namespace(brands=[]) %}
-                        {% for p in products %}{% if p.brand not in ns_b.brands %}{% set _ = ns_b.brands.append(p.brand) %}{% endif %}{% endfor %}
-                        {% for b in ns_b.brands|sort %}<option value="{{ b }}">{{ b|upper }}</option>{% endfor %}
+                        {# This loop expects brands from the dim_brands table #}
+                        {% for b in brands %}
+                            <option value="{{ b.brand_name }}">{{ b.brand_name|upper }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>Pro Rating</label>
+                    <label>Rating Fact</label>
                     <select id="ratingFilter" class="form-select">
                         <option value="0">All Ratings</option>
                         <option value="4.5">Elite (4.5+)</option>
                         <option value="4.0">High (4.0+)</option>
-                        <option value="3.5">Good (3.5+)</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label>Manifest Export Format</label>
+                    <label>Schema Export</label>
                     <select id="exportFormat" class="form-select">
-                        <option value="pdf-visual">Visual PDF w/ Live Chart (.pdf)</option>
-                        <option value="pdf-data">Clean Data PDF Only (.pdf)</option>
-                        <option value="xlsx">Excel Spreadsheet (.xlsx)</option>
-                        <option value="png">HQ Dashboard Snapshot (.png)</option>
-                        <option value="csv">Standard Table (.csv)</option>
-                        <option value="json">Developer Stream (.json)</option>
+                        <option value="pdf-visual">Visual PDF w/ Chart (.pdf)</option>
+                        <option value="pdf-data">Data PDF Only (.pdf)</option>
+                        <option value="xlsx">Excel Sheet (.xlsx)</option>
+                        <option value="csv">Standard CSV (.csv)</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button onclick="handleMasterExport()" class="btn btn-hd w-100 py-2">Execute Filtered Export</button>
+                    <button onclick="handleMasterExport()" class="btn btn-hd w-100 py-2">Execute Export</button>
                 </div>
             </div>
         </div>
@@ -125,26 +119,32 @@
             <table class="table table-hover align-middle fixed-table mb-0">
                 <thead>
                     <tr>
-                        <th class="col-ids text-center">SKU / DNA</th>
+                        <th class="col-ids text-center">SKU (ID)</th>
                         <th class="col-img text-center">Product</th>
                         <th class="col-desc">Description</th>
-                        <th class="col-brand text-center">Brand</th>
-                        <th class="col-price text-center">Price</th>
-                        <th class="col-rate text-center">Rating</th>
+                        <th class="col-brand text-center">Brand (Dim)</th>
+                        <th class="col-price text-center">Price (Fact)</th>
+                        <th class="col-rate text-center">Rating (Fact)</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
+                    {# 
+                        DATA SHAPE EXPECTED:
+                        products = [{
+                            "product_id": 123,
+                            "title": "...",
+                            "photo_url": "...",
+                            "brand_name": "...", 
+                            "price": 99.99,
+                            "rating": 4.5
+                        }]
+                    #}
                     {% for p in products %}
-                        {% set brand = p.brand|upper %}
-                        {# Brand Shield Logic #}
-                        {% if 'DEERE' in p.title|upper or p.brand|upper == 'JOHN' %}{% set brand = 'JOHN DEERE' %}{% endif %}
-                        {% if 'SAMSUNG' in p.title|upper %}{% set brand = 'SAMSUNG' %}{% endif %}
-
-                        <tr class="product-row" data-brand="{{ brand }}" data-price="{{ p.price }}" data-rating="{{ p.rating }}">
-                            <td class="col-ids text-center"><span class="sku-badge search-upc">#{{ p.id }}</span></td>
+                        <tr class="product-row" data-brand="{{ p.brand_name }}" data-price="{{ p.price }}" data-rating="{{ p.rating }}">
+                            <td class="col-ids text-center"><span class="sku-badge search-upc">#{{ p.product_id }}</span></td>
                             <td class="col-img text-center"><img src="{{ p.photo_url }}" class="img-thumb" onerror="this.src='https://via.placeholder.com/60?text=HD'"></td>
-                            <td class="col-desc"><div class="description-cell search-title" title="{{ p.title }}">{{ p.title|upper }}</div></td>
-                            <td class="col-brand text-center"><span class="badge brand-badge search-brand">{{ brand }}</span></td>
+                            <td class="col-desc"><div class="description-cell search-title">{{ p.title|upper }}</div></td>
+                            <td class="col-brand text-center"><span class="badge brand-badge search-brand">{{ p.brand_name }}</span></td>
                             <td class="col-price text-center fw-bold text-dark">${{ "%.2f"|format(p.price) }}</td>
                             <td class="col-rate text-center fw-bold text-warning">⭐ {{ p.rating }}</td>
                         </tr>
@@ -172,7 +172,6 @@
                 const brand = row.dataset.brand;
                 const rating = parseFloat(row.dataset.rating);
                 
-                // DYNAMIC FILTER LOGIC
                 const matches = title.includes(term) && 
                                 (bLimit === 'all' || brand === bLimit) && 
                                 (rating >= minRate);
@@ -204,7 +203,7 @@
                 const ctx = document.getElementById('brandChart').getContext('2d');
                 brandChart = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels, datasets: [{ label: 'SKU Distribution', data, backgroundColor: '#F96302' }] },
+                    data: { labels, datasets: [{ label: 'Fact Table Count', data, backgroundColor: '#F96302' }] },
                     options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
                 });
             }
@@ -212,10 +211,7 @@
 
         async function handleMasterExport() {
             const format = document.getElementById('exportFormat').value;
-            
-            // CRITICAL FIX: Only grab rows currently visible to the user
             const visibleRows = rows.filter(r => r.style.display !== 'none');
-            
             const data = visibleRows.map(r => ({
                 SKU: r.querySelector('.search-upc').innerText.replace('#', ''),
                 Title: r.querySelector('.search-title').innerText,
@@ -224,19 +220,19 @@
                 Rating: r.dataset.rating
             }));
 
-            if (data.length === 0) return alert("Zero products matching your current filters. Export canceled.");
+            if (data.length === 0) return alert("No relational data matching filters.");
 
             if (format.startsWith('pdf')) {
                 const doc = new jsPDF();
                 doc.setFont("helvetica", "bold");
-                doc.setTextColor(249, 99, 2); // HD Orange
-                doc.setFontSize(18);
-                doc.text("THE VENDOR VANTAGE | PRO MANIFEST", 14, 20);
+                doc.setTextColor(249, 99, 2);
+                doc.setFontSize(20);
+                doc.text("VENDOR VANTAGE | STAR SCHEMA MANIFEST", 14, 20);
                 
                 doc.setFontSize(10);
                 doc.setTextColor(100);
-                doc.text(`Pro Account: Akshat Patel | Date: ${new Date().toLocaleDateString()}`, 14, 28);
-                doc.text(`Visible Inventory Value: ${document.getElementById('kpiValue').innerText} | Count: ${data.length}`, 14, 33);
+                doc.text(`Pro Analytics for Akshat Patel | Date: ${new Date().toLocaleDateString()}`, 14, 28);
+                doc.text(`Fact Table Value: ${document.getElementById('kpiValue').innerText} | Items: ${data.length}`, 14, 33);
 
                 let startY = 40;
                 if (format === 'pdf-visual') {
@@ -248,47 +244,30 @@
 
                 doc.autoTable({
                     startY: startY,
-                    head: [['SKU', 'Product Description', 'Brand', 'Price', 'Rating']],
+                    head: [['SKU', 'Description', 'Brand Dim', 'Price Fact', 'Rating Fact']],
                     body: data.map(d => [d.SKU, d.Title, d.Brand, d.Price, d.Rating]),
                     headStyles: { fillColor: [51, 51, 51], textColor: [255, 255, 255] },
-                    alternateRowStyles: { fillColor: [242, 242, 242] },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
                     styles: { fontSize: 8 }
                 });
-                doc.save(`HD_Pro_Filtered_${format}.pdf`);
+                doc.save(`HD_Relational_Manifest_${format}.pdf`);
             } 
             else if (format === 'xlsx') {
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Filtered_Inventory");
-                XLSX.writeFile(wb, "HD_Pro_Filtered_Inventory.xlsx");
-            }
-            else if (format === 'png') {
-                const filters = document.querySelector('.filter-card');
-                filters.style.visibility = 'hidden';
-                const canvas = await html2canvas(document.body, { scale: 2 });
-                const link = document.createElement('a');
-                link.download = 'HD_Dashboard_Snapshot.png';
-                link.href = canvas.toDataURL();
-                link.click();
-                filters.style.visibility = 'visible';
-            }
-            else if (format === 'csv') {
-                const csv = "SKU,Title,Brand,Price,Rating\n" + data.map(d => `"${d.SKU}","${d.Title.replace(/"/g, '""')}","${d.Brand}",${d.Price},${d.Rating}`).join("\n");
-                downloadFile(csv, 'HD_Filtered_Export.csv', 'text/csv');
+                XLSX.utils.book_append_sheet(wb, ws, "Star_Schema_Export");
+                XLSX.writeFile(wb, "HD_Relational_Inventory.xlsx");
             }
             else {
-                downloadFile(JSON.stringify(data, null, 2), 'HD_Filtered_Export.json', 'application/json');
+                const csv = "SKU,Title,Brand,Price,Rating\n" + data.map(d => `"${d.SKU}","${d.Title.replace(/"/g, '""')}","${d.Brand}",${d.Price},${d.Rating}`).join("\n");
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HD_Relational_Export.csv'; a.click();
             }
-        }
-
-        function downloadFile(content, name, type) {
-            const blob = new Blob([content], { type });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = name; a.click();
         }
 
         ['searchInput', 'brandFilter', 'ratingFilter'].forEach(id => {
-            document.getElementById(id).addEventListener('input', updateDashboard);
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', updateDashboard);
         });
 
         updateDashboard();

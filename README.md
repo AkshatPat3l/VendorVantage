@@ -50,7 +50,7 @@ This is not just an inventory list. It is an Intelligence Layer designed to help
 ## Installation and Local Setup
 
 1. **Clone the repository:**
-   git clone https://github.com/YOUR_USERNAME/hd-vendor-vantage.git
+   git clone https://github.com/AkshatPat3l/hd-vendor-vantage.git
 2. **Build the container:**
    docker build -t vendor-vantage .
 3. **Run the Sync Master:**

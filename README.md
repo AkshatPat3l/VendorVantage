@@ -62,4 +62,3 @@ This is not just an inventory list. It is an Intelligence Layer designed to help
 
 **Akshat Patel**
 Software Engineer | Full Stack Developer
-Specializing in Data Driven Retail Analytics
